@@ -3,14 +3,45 @@ package com.company;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Arrays;
+import java.lang.Math;
 
 
 public class Main {
     public static void main(String[] args) {
+        System.out.println("Example of levenshtein distance method: kot and kita distance is " + levQwerty("kot","kita"));
+    }
+
+    public static double levQwerty(String string1, String string2) {
         HashMap<String, List<String>> qwertyDictionary = new HashMap<>();
         fillDictionary(qwertyDictionary);
-        System.out.println(keyIsNextTo("q", "w", qwertyDictionary));
-        System.out.println(keyIsNextTo("q", "e", qwertyDictionary));
+
+        String s1 = string1.toLowerCase().trim();
+        String s2 = string2.toLowerCase().trim();
+
+        double[][] distanceTable = new double[s1.length()+1][s2.length()+1];
+
+        for(int i = 0; i<= s1.length(); i++) {
+            distanceTable[i][0] = i;
+        }
+        for(int j = 1; j<= s2.length(); j++) {
+            distanceTable[0][j] = j;
+        }
+
+        for(int i = 1; i<=s1.length(); i++) {
+            for(int j = 1; j<=s2.length(); j++) {
+                double costOfSubstitution;
+                if(s1.charAt(i -1) == s2.charAt(j -1)) costOfSubstitution = 0;
+                else if(keyIsNextTo(Character.toString(s1.charAt(i -1)), Character.toString(s2.charAt(j -1)), qwertyDictionary)) {
+                    costOfSubstitution = 0.5;
+                } else costOfSubstitution = 1;
+
+                distanceTable[i][j] = Math.min(Math.min(distanceTable[i-1][j]+1,
+                                            distanceTable[i][j-1]+1),
+                                            distanceTable[i-1][j-1] + costOfSubstitution);
+            }
+        }
+
+        return distanceTable[s1.length()][s2.length()];
     }
 
     public static boolean keyIsNextTo(String key1, String key2, HashMap<String, List<String>> dictionary) { //return true if key2 is next to key1
